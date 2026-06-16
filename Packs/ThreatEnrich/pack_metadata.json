@@ -1,0 +1,26 @@
+{
+    "name": "ThreatKiller",
+    "description": "Threat intelligence enrichment for IP, URL, Domain, and File Hash",
+    "support": "developer",
+    "currentVersion": "1.0.0",
+    "author": "CoryC",
+    "url": "",
+    "email": "ccrook@norlem.com",
+    "categories": [
+        "Data Enrichment & Threat Intelligence"
+    ],
+    "tags": [
+        "enrichment"
+    ],
+    "useCases": [],
+    "keywords": [],
+    "marketplaces": [
+        "xsoar",
+        "marketplacev2"
+    ],
+    "firstCreated": "2026-06-16T16:21:33Z",
+    "devEmail": [
+        "ccrook@norlem.com"
+    ],
+    "githubUser": []
+}
