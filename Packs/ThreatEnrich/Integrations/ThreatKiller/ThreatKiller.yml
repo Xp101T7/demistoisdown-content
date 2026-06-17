@@ -21,13 +21,13 @@ configuration:
   name: feed_endpoint
   defaultvalue: /indicators
   type: 0
-  required: true
+  required: false
   additionalinfo: API endpoint to pull indicators from e.g. /indicators or /api/v1/feed
 - display: Indicator Value Field
   name: value_field
   defaultvalue: value
   type: 0
-  required: true
+  required: false
   additionalinfo: The JSON field name that contains the indicator value
 - display: Indicator Type Field
   name: type_field
@@ -47,7 +47,6 @@ configuration:
   required: false
 - display: Indicator Reputation
   name: feedReputation
-  defaultvalue: feedInstanceReputationNotSet
   type: 18
   required: false
   options:
@@ -55,11 +54,12 @@ configuration:
   - Good
   - Suspicious
   - Bad
+  additionalinfo: Indicators from this integration instance will be marked with this reputation
 - display: Source Reliability
   name: feedReliability
-  defaultvalue: B - Usually reliable
   type: 15
   required: true
+  additionalinfo: Reliability of the source providing the intelligence data
   options:
   - A+ - 3rd party enrichment
   - A - Completely reliable
@@ -72,6 +72,7 @@ configuration:
   name: tlp_color
   type: 15
   required: false
+  additionalinfo: The Traffic Light Protocol (TLP) designation to apply to indicators fetched from the feed
   options:
   - RED
   - AMBER
@@ -130,17 +131,20 @@ script:
     - contextPath: ThreatKiller.IP.value
       description: The IP address.
       type: String
+    - contextPath: IP.Address
+      description: The IP address.
+      type: String
     - contextPath: DBotScore.Indicator
       description: The indicator value.
+      type: String
+    - contextPath: DBotScore.Type
+      description: The indicator type.
       type: String
     - contextPath: DBotScore.Score
       description: The DBot score.
       type: Number
-    - contextPath: DBotScore.Type
-      description: The indicator type.
-      type: String
     - contextPath: DBotScore.Vendor
-      description: The vendor.
+      description: The vendor used to calculate the score.
       type: String
   - name: url
     description: Enriches a URL.
@@ -153,12 +157,21 @@ script:
     - contextPath: ThreatKiller.URL.value
       description: The URL.
       type: String
+    - contextPath: URL.Data
+      description: The URL.
+      type: String
     - contextPath: DBotScore.Indicator
       description: The indicator value.
+      type: String
+    - contextPath: DBotScore.Type
+      description: The indicator type.
       type: String
     - contextPath: DBotScore.Score
       description: The DBot score.
       type: Number
+    - contextPath: DBotScore.Vendor
+      description: The vendor used to calculate the score.
+      type: String
   - name: domain
     description: Enriches a domain.
     arguments:
@@ -170,12 +183,21 @@ script:
     - contextPath: ThreatKiller.Domain.value
       description: The domain.
       type: String
+    - contextPath: Domain.Name
+      description: The domain name.
+      type: String
     - contextPath: DBotScore.Indicator
       description: The indicator value.
+      type: String
+    - contextPath: DBotScore.Type
+      description: The indicator type.
       type: String
     - contextPath: DBotScore.Score
       description: The DBot score.
       type: Number
+    - contextPath: DBotScore.Vendor
+      description: The vendor used to calculate the score.
+      type: String
   - name: file
     description: Enriches a file hash.
     arguments:
@@ -187,12 +209,27 @@ script:
     - contextPath: ThreatKiller.File.value
       description: The file hash.
       type: String
+    - contextPath: File.MD5
+      description: The MD5 hash.
+      type: String
+    - contextPath: File.SHA1
+      description: The SHA1 hash.
+      type: String
+    - contextPath: File.SHA256
+      description: The SHA256 hash.
+      type: String
     - contextPath: DBotScore.Indicator
       description: The indicator value.
+      type: String
+    - contextPath: DBotScore.Type
+      description: The indicator type.
       type: String
     - contextPath: DBotScore.Score
       description: The DBot score.
       type: Number
+    - contextPath: DBotScore.Vendor
+      description: The vendor used to calculate the score.
+      type: String
   - name: cve
     description: Enriches a CVE.
     arguments:
@@ -203,6 +240,18 @@ script:
     outputs:
     - contextPath: ThreatKiller.CVE.value
       description: The CVE ID.
+      type: String
+    - contextPath: DBotScore.Indicator
+      description: The indicator value.
+      type: String
+    - contextPath: DBotScore.Type
+      description: The indicator type.
+      type: String
+    - contextPath: DBotScore.Score
+      description: The DBot score.
+      type: Number
+    - contextPath: DBotScore.Vendor
+      description: The vendor used to calculate the score.
       type: String
   - name: email
     description: Enriches an email address.
@@ -218,9 +267,15 @@ script:
     - contextPath: DBotScore.Indicator
       description: The indicator value.
       type: String
+    - contextPath: DBotScore.Type
+      description: The indicator type.
+      type: String
     - contextPath: DBotScore.Score
       description: The DBot score.
       type: Number
+    - contextPath: DBotScore.Vendor
+      description: The vendor used to calculate the score.
+      type: String
 fromversion: 8.0.0
 marketplaces:
 - marketplacev2
