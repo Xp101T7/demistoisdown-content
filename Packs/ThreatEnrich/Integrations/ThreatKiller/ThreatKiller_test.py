@@ -56,12 +56,12 @@ def test_parse_indicators_dict():
     from ThreatKiller import parse_indicators
     raw = {
         "data": [
-            {"value": "https://evil.com", "type": "url", "score": 50},
+            {"value": "https://example-malicious.test", "type": "url", "score": 50},
         ]
     }
     result = parse_indicators(raw, "value", "type")
     assert len(result) == 1
-    assert result[0]["value"] == "https://evil.com"
+    assert result[0]["value"] == "https://example-malicious.test"
     assert result[0]["score"] == 2  # SUSPICIOUS
 
 
