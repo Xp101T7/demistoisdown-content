@@ -20,6 +20,7 @@ INDICATOR_TYPE_MAP = {
 
 # ─── Client ───────────────────────────────────────────────────────────────────
 
+
 class ThreatKillerClient(BaseClient):
     """Generic REST/JSON client with Bearer token auth."""
 
@@ -50,6 +51,7 @@ class ThreatKillerClient(BaseClient):
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
+
 
 def detect_indicator_type(value: str, type_hint: str = "") -> str:
     """Auto-detect indicator type from value or hint."""
@@ -100,7 +102,7 @@ def parse_indicators(raw_data: Any, value_field: str, type_field: str) -> list[d
         score = item.get("score") or item.get("confidence") or item.get("risk_score") or 0
 
         # Map score to DBotScore
-        if isinstance(score, (int, float)):
+        if isinstance(score, int | float):
             if score >= 75:
                 dbot_score = Common.DBotScore.BAD
             elif score >= 40:
@@ -110,25 +112,28 @@ def parse_indicators(raw_data: Any, value_field: str, type_field: str) -> list[d
         else:
             dbot_score = Common.DBotScore.NONE
 
-        indicators.append({
-            "value": value,
-            "type": indicator_type,
-            "rawJSON": item,
-            "score": dbot_score,
-            "fields": {
-                "tags": item.get("tags", []),
-                "description": item.get("description", ""),
-                "firstseenbysource": item.get("first_seen") or item.get("created_at", ""),
-                "lastseenbysource": item.get("last_seen") or item.get("updated_at", ""),
-                "confidence": score,
-                "trafficlightprotocol": item.get("tlp", "WHITE"),
-            },
-        })
+        indicators.append(
+            {
+                "value": value,
+                "type": indicator_type,
+                "rawJSON": item,
+                "score": dbot_score,
+                "fields": {
+                    "tags": item.get("tags", []),
+                    "description": item.get("description", ""),
+                    "firstseenbysource": item.get("first_seen") or item.get("created_at", ""),
+                    "lastseenbysource": item.get("last_seen") or item.get("updated_at", ""),
+                    "confidence": score,
+                    "trafficlightprotocol": item.get("tlp", "WHITE"),
+                },
+            }
+        )
 
     return indicators
 
 
 # ─── Feed Command (Scheduled Auto-Pull) ───────────────────────────────────────
+
 
 def fetch_indicators_command(client: ThreatKillerClient, params: dict) -> list[dict]:
     """Called automatically by XSIAM on a schedule to pull indicators."""
@@ -143,6 +148,7 @@ def fetch_indicators_command(client: ThreatKillerClient, params: dict) -> list[d
 
 
 # ─── Manual Commands ──────────────────────────────────────────────────────────
+
 
 def get_indicators_command(client: ThreatKillerClient, args: dict, params: dict) -> CommandResults:
     """Manual command to pull and display indicators."""
@@ -191,13 +197,15 @@ def ip_command(client: ThreatKillerClient, args: dict, params: dict) -> list[Com
             integration_name="ThreatKiller",
             score=score,
         )
-        results.append(CommandResults(
-            outputs_prefix="ThreatKiller.IP",
-            outputs_key_field="value",
-            outputs=data.get("rawJSON", {"value": ip}),
-            readable_output=tableToMarkdown(f"IP: {ip}", data.get("rawJSON", {"value": ip, "result": "No data found"})),
-            indicator=Common.IP(ip=ip, dbot_score=dbot),
-        ))
+        results.append(
+            CommandResults(
+                outputs_prefix="ThreatKiller.IP",
+                outputs_key_field="value",
+                outputs=data.get("rawJSON", {"value": ip}),
+                readable_output=tableToMarkdown(f"IP: {ip}", data.get("rawJSON", {"value": ip, "result": "No data found"})),
+                indicator=Common.IP(ip=ip, dbot_score=dbot),
+            )
+        )
     return results
 
 
@@ -224,13 +232,15 @@ def url_command(client: ThreatKillerClient, args: dict, params: dict) -> list[Co
             integration_name="ThreatKiller",
             score=score,
         )
-        results.append(CommandResults(
-            outputs_prefix="ThreatKiller.URL",
-            outputs_key_field="value",
-            outputs=data.get("rawJSON", {"value": url}),
-            readable_output=tableToMarkdown(f"URL: {url}", data.get("rawJSON", {"value": url, "result": "No data found"})),
-            indicator=Common.URL(url=url, dbot_score=dbot),
-        ))
+        results.append(
+            CommandResults(
+                outputs_prefix="ThreatKiller.URL",
+                outputs_key_field="value",
+                outputs=data.get("rawJSON", {"value": url}),
+                readable_output=tableToMarkdown(f"URL: {url}", data.get("rawJSON", {"value": url, "result": "No data found"})),
+                indicator=Common.URL(url=url, dbot_score=dbot),
+            )
+        )
     return results
 
 
@@ -257,13 +267,17 @@ def domain_command(client: ThreatKillerClient, args: dict, params: dict) -> list
             integration_name="ThreatKiller",
             score=score,
         )
-        results.append(CommandResults(
-            outputs_prefix="ThreatKiller.Domain",
-            outputs_key_field="value",
-            outputs=data.get("rawJSON", {"value": domain}),
-            readable_output=tableToMarkdown(f"Domain: {domain}", data.get("rawJSON", {"value": domain, "result": "No data found"})),
-            indicator=Common.Domain(domain=domain, dbot_score=dbot),
-        ))
+        results.append(
+            CommandResults(
+                outputs_prefix="ThreatKiller.Domain",
+                outputs_key_field="value",
+                outputs=data.get("rawJSON", {"value": domain}),
+                readable_output=tableToMarkdown(
+                    f"Domain: {domain}", data.get("rawJSON", {"value": domain, "result": "No data found"})
+                ),
+                indicator=Common.Domain(domain=domain, dbot_score=dbot),
+            )
+        )
     return results
 
 
@@ -290,13 +304,17 @@ def file_command(client: ThreatKillerClient, args: dict, params: dict) -> list[C
             integration_name="ThreatKiller",
             score=score,
         )
-        results.append(CommandResults(
-            outputs_prefix="ThreatKiller.File",
-            outputs_key_field="value",
-            outputs=data.get("rawJSON", {"value": file_hash}),
-            readable_output=tableToMarkdown(f"File Hash: {file_hash}", data.get("rawJSON", {"value": file_hash, "result": "No data found"})),
-            indicator=Common.File(dbot_score=dbot),
-        ))
+        results.append(
+            CommandResults(
+                outputs_prefix="ThreatKiller.File",
+                outputs_key_field="value",
+                outputs=data.get("rawJSON", {"value": file_hash}),
+                readable_output=tableToMarkdown(
+                    f"File Hash: {file_hash}", data.get("rawJSON", {"value": file_hash, "result": "No data found"})
+                ),
+                indicator=Common.File(dbot_score=dbot),
+            )
+        )
     return results
 
 
@@ -315,12 +333,14 @@ def cve_command(client: ThreatKillerClient, args: dict, params: dict) -> list[Co
         except Exception:
             data = {}
 
-        results.append(CommandResults(
-            outputs_prefix="ThreatKiller.CVE",
-            outputs_key_field="value",
-            outputs=data.get("rawJSON", {"value": cve}),
-            readable_output=tableToMarkdown(f"CVE: {cve}", data.get("rawJSON", {"value": cve, "result": "No data found"})),
-        ))
+        results.append(
+            CommandResults(
+                outputs_prefix="ThreatKiller.CVE",
+                outputs_key_field="value",
+                outputs=data.get("rawJSON", {"value": cve}),
+                readable_output=tableToMarkdown(f"CVE: {cve}", data.get("rawJSON", {"value": cve, "result": "No data found"})),
+            )
+        )
     return results
 
 
@@ -347,17 +367,22 @@ def email_command(client: ThreatKillerClient, args: dict, params: dict) -> list[
             integration_name="ThreatKiller",
             score=score,
         )
-        results.append(CommandResults(
-            outputs_prefix="ThreatKiller.Email",
-            outputs_key_field="value",
-            outputs=data.get("rawJSON", {"value": email}),
-            readable_output=tableToMarkdown(f"Email: {email}", data.get("rawJSON", {"value": email, "result": "No data found"})),
-            indicator=Common.EMAIL(address=email, dbot_score=dbot),
-        ))
+        results.append(
+            CommandResults(
+                outputs_prefix="ThreatKiller.Email",
+                outputs_key_field="value",
+                outputs=data.get("rawJSON", {"value": email}),
+                readable_output=tableToMarkdown(
+                    f"Email: {email}", data.get("rawJSON", {"value": email, "result": "No data found"})
+                ),
+                indicator=Common.EMAIL(address=email, dbot_score=dbot),
+            )
+        )
     return results
 
 
 # ─── Test Module ──────────────────────────────────────────────────────────────
+
 
 def test_module(client: ThreatKillerClient, params: dict) -> str:
     """Test connectivity to the API."""
@@ -370,6 +395,7 @@ def test_module(client: ThreatKillerClient, params: dict) -> str:
 
 
 # ─── Entry Point ──────────────────────────────────────────────────────────────
+
 
 def main():
     params = demisto.params()
@@ -393,8 +419,8 @@ def main():
             return_results(test_module(client, params))
         elif command == "fetch-indicators":
             indicators = fetch_indicators_command(client, params)
-            for batch in batch(indicators, batch_size=2000):
-                demisto.createIndicators(batch)
+            for indicators_batch in batch(indicators, batch_size=2000):
+                demisto.createIndicators(indicators_batch)
         elif command == "threatkiller-get-indicators":
             return_results(get_indicators_command(client, args, params))
         elif command == "ip":

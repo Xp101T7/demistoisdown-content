@@ -2,21 +2,87 @@ commonfields:
   id: ThreatKiller
   version: -1
 name: ThreatKiller
-display: ThreatKiller (OpenCTI)
+display: ThreatKiller
 category: Data Enrichment & Threat Intelligence
-description: Enriches IP, URL, Domain, and File Hash indicators using OpenCTI's GraphQL API.
+description: Generic threat intelligence feed integration that pulls indicators from a custom REST/JSON API using Bearer token authentication.
 configuration:
-- display: OpenCTI Base URL
+- display: API Base URL
   name: base_url
-  defaultvalue: http://opencti:4000
+  defaultvalue: https://your-api-url.com
   type: 0
   required: true
-  additionalinfo: Your OpenCTI instance URL e.g. https://opencti.yourcompany.com
-- display: API Token
+  additionalinfo: Base URL of your threat intelligence API
+- display: Bearer Token
   name: credentials
   type: 9
   required: true
-  additionalinfo: UUID token from your OpenCTI user profile
+  additionalinfo: Bearer token for API authentication
+- display: Feed Endpoint
+  name: feed_endpoint
+  defaultvalue: /indicators
+  type: 0
+  required: false
+  additionalinfo: API endpoint to pull indicators from e.g. /indicators or /api/v1/feed
+- display: Indicator Value Field
+  name: value_field
+  defaultvalue: value
+  type: 0
+  required: false
+  additionalinfo: The JSON field name that contains the indicator value
+- display: Indicator Type Field
+  name: type_field
+  defaultvalue: type
+  type: 0
+  required: false
+  additionalinfo: The JSON field name that contains the indicator type
+- display: Max Indicators Per Fetch
+  name: max_indicators
+  defaultvalue: "1000"
+  type: 0
+  required: false
+- display: Fetch indicators
+  name: feed
+  defaultvalue: "true"
+  type: 8
+  required: false
+- display: Indicator Reputation
+  name: feedReputation
+  type: 18
+  required: false
+  options:
+  - None
+  - Good
+  - Suspicious
+  - Bad
+  additionalinfo: Indicators from this integration instance will be marked with this reputation
+- display: Source Reliability
+  name: feedReliability
+  type: 15
+  required: true
+  additionalinfo: Reliability of the source providing the intelligence data
+  options:
+  - A+ - 3rd party enrichment
+  - A - Completely reliable
+  - B - Usually reliable
+  - C - Fairly reliable
+  - D - Not usually reliable
+  - E - Unreliable
+  - F - Reliability cannot be judged
+- display: Traffic Light Protocol Color
+  name: tlp_color
+  type: 15
+  required: false
+  additionalinfo: The Traffic Light Protocol (TLP) designation to apply to indicators fetched from the feed
+  options:
+  - RED
+  - AMBER
+  - GREEN
+  - WHITE
+- display: Feed Fetch Interval
+  name: feedFetchInterval
+  defaultvalue: "60"
+  type: 19
+  required: false
 - display: Trust any certificate (not secure)
   name: insecure
   type: 8
@@ -29,28 +95,45 @@ script:
   script: ''
   type: python
   subtype: python3
+  feed: true
   dockerimage: demisto/python3:3.10.13.86272
   commands:
+  - name: threatkiller-get-indicators
+    description: Manually fetch and display indicators from the API.
+    arguments:
+    - name: limit
+      description: Maximum number of indicators to return.
+      defaultValue: "50"
+    outputs:
+    - contextPath: ThreatKiller.Indicators.value
+      description: The indicator value.
+      type: String
+    - contextPath: ThreatKiller.Indicators.type
+      description: The indicator type.
+      type: String
+    - contextPath: ThreatKiller.Indicators.score
+      description: The DBot score.
+      type: Number
+    - contextPath: ThreatKiller.Indicators.fields.tags
+      description: Tags associated with the indicator.
+      type: Unknown
+    - contextPath: ThreatKiller.Indicators.fields.confidence
+      description: Confidence score from the source.
+      type: Number
   - name: ip
-    description: Enriches an IP address using OpenCTI.
+    description: Enriches an IP address.
     arguments:
     - name: ip
       required: true
       description: IP address to enrich.
       isArray: true
     outputs:
-    - contextPath: ThreatKiller.IP.Value
+    - contextPath: ThreatKiller.IP.value
       description: The IP address.
       type: String
-    - contextPath: ThreatKiller.IP.EntityType
-      description: The STIX entity type.
+    - contextPath: IP.Address
+      description: The IP address.
       type: String
-    - contextPath: ThreatKiller.IP.Indicators
-      description: Linked indicators from OpenCTI.
-      type: Unknown
-    - contextPath: ThreatKiller.IP.Reports
-      description: Linked reports from OpenCTI.
-      type: Unknown
     - contextPath: DBotScore.Indicator
       description: The indicator value.
       type: String
@@ -64,83 +147,135 @@ script:
       description: The vendor used to calculate the score.
       type: String
   - name: url
-    description: Enriches a URL using OpenCTI.
+    description: Enriches a URL.
     arguments:
     - name: url
       required: true
       description: URL to enrich.
       isArray: true
     outputs:
-    - contextPath: ThreatKiller.URL.Value
+    - contextPath: ThreatKiller.URL.value
       description: The URL.
       type: String
-    - contextPath: ThreatKiller.URL.EntityType
-      description: The STIX entity type.
+    - contextPath: URL.Data
+      description: The URL.
       type: String
-    - contextPath: ThreatKiller.URL.Indicators
-      description: Linked indicators from OpenCTI.
-      type: Unknown
-    - contextPath: ThreatKiller.URL.Reports
-      description: Linked reports from OpenCTI.
-      type: Unknown
     - contextPath: DBotScore.Indicator
       description: The indicator value.
+      type: String
+    - contextPath: DBotScore.Type
+      description: The indicator type.
       type: String
     - contextPath: DBotScore.Score
       description: The DBot score.
       type: Number
+    - contextPath: DBotScore.Vendor
+      description: The vendor used to calculate the score.
+      type: String
   - name: domain
-    description: Enriches a domain using OpenCTI.
+    description: Enriches a domain.
     arguments:
     - name: domain
       required: true
       description: Domain to enrich.
       isArray: true
     outputs:
-    - contextPath: ThreatKiller.Domain.Value
+    - contextPath: ThreatKiller.Domain.value
       description: The domain.
       type: String
-    - contextPath: ThreatKiller.Domain.EntityType
-      description: The STIX entity type.
+    - contextPath: Domain.Name
+      description: The domain name.
       type: String
-    - contextPath: ThreatKiller.Domain.Indicators
-      description: Linked indicators from OpenCTI.
-      type: Unknown
-    - contextPath: ThreatKiller.Domain.Reports
-      description: Linked reports from OpenCTI.
-      type: Unknown
     - contextPath: DBotScore.Indicator
       description: The indicator value.
+      type: String
+    - contextPath: DBotScore.Type
+      description: The indicator type.
       type: String
     - contextPath: DBotScore.Score
       description: The DBot score.
       type: Number
+    - contextPath: DBotScore.Vendor
+      description: The vendor used to calculate the score.
+      type: String
   - name: file
-    description: Enriches a file hash using OpenCTI.
+    description: Enriches a file hash.
     arguments:
     - name: file
       required: true
       description: File hash (MD5, SHA1, SHA256) to enrich.
       isArray: true
     outputs:
-    - contextPath: ThreatKiller.File.Value
+    - contextPath: ThreatKiller.File.value
       description: The file hash.
       type: String
-    - contextPath: ThreatKiller.File.EntityType
-      description: The STIX entity type.
+    - contextPath: File.MD5
+      description: The MD5 hash.
       type: String
-    - contextPath: ThreatKiller.File.Indicators
-      description: Linked indicators from OpenCTI.
-      type: Unknown
-    - contextPath: ThreatKiller.File.Reports
-      description: Linked reports from OpenCTI.
-      type: Unknown
+    - contextPath: File.SHA1
+      description: The SHA1 hash.
+      type: String
+    - contextPath: File.SHA256
+      description: The SHA256 hash.
+      type: String
     - contextPath: DBotScore.Indicator
       description: The indicator value.
+      type: String
+    - contextPath: DBotScore.Type
+      description: The indicator type.
       type: String
     - contextPath: DBotScore.Score
       description: The DBot score.
       type: Number
+    - contextPath: DBotScore.Vendor
+      description: The vendor used to calculate the score.
+      type: String
+  - name: cve
+    description: Enriches a CVE.
+    arguments:
+    - name: cve
+      required: true
+      description: CVE ID to enrich e.g. CVE-2021-44228.
+      isArray: true
+    outputs:
+    - contextPath: ThreatKiller.CVE.value
+      description: The CVE ID.
+      type: String
+    - contextPath: DBotScore.Indicator
+      description: The indicator value.
+      type: String
+    - contextPath: DBotScore.Type
+      description: The indicator type.
+      type: String
+    - contextPath: DBotScore.Score
+      description: The DBot score.
+      type: Number
+    - contextPath: DBotScore.Vendor
+      description: The vendor used to calculate the score.
+      type: String
+  - name: email
+    description: Enriches an email address.
+    arguments:
+    - name: email
+      required: true
+      description: Email address to enrich.
+      isArray: true
+    outputs:
+    - contextPath: ThreatKiller.Email.value
+      description: The email address.
+      type: String
+    - contextPath: DBotScore.Indicator
+      description: The indicator value.
+      type: String
+    - contextPath: DBotScore.Type
+      description: The indicator type.
+      type: String
+    - contextPath: DBotScore.Score
+      description: The DBot score.
+      type: Number
+    - contextPath: DBotScore.Vendor
+      description: The vendor used to calculate the score.
+      type: String
 fromversion: 8.0.0
 marketplaces:
 - marketplacev2
