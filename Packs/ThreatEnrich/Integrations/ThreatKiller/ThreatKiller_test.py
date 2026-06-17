@@ -3,46 +3,55 @@ from unittest.mock import MagicMock
 
 def test_detect_indicator_type_ip():
     from ThreatKiller import detect_indicator_type
+
     assert detect_indicator_type("8.8.8.8") == "IP"
 
 
 def test_detect_indicator_type_url():
     from ThreatKiller import detect_indicator_type
+
     assert detect_indicator_type("https://malicious.com") == "URL"
 
 
 def test_detect_indicator_type_domain():
     from ThreatKiller import detect_indicator_type
+
     assert detect_indicator_type("malicious.com") == "Domain"
 
 
 def test_detect_indicator_type_md5():
     from ThreatKiller import detect_indicator_type
+
     assert detect_indicator_type("d41d8cd98f00b204e9800998ecf8427e") == "File"
 
 
 def test_detect_indicator_type_sha256():
     from ThreatKiller import detect_indicator_type
+
     assert detect_indicator_type("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855") == "File"
 
 
 def test_detect_indicator_type_cve():
     from ThreatKiller import detect_indicator_type
+
     assert detect_indicator_type("CVE-2021-44228") == "CVE"
 
 
 def test_detect_indicator_type_email():
     from ThreatKiller import detect_indicator_type
+
     assert detect_indicator_type("test@malicious.com") == "Email"
 
 
 def test_detect_indicator_type_hint():
     from ThreatKiller import detect_indicator_type
+
     assert detect_indicator_type("anything", "ipv6") == "IPv6"
 
 
 def test_parse_indicators_list():
     from ThreatKiller import parse_indicators
+
     raw = [
         {"value": "8.8.8.8", "type": "ip", "score": 80, "tags": ["malicious"]},
         {"value": "malicious.com", "type": "domain", "score": 30, "tags": []},
@@ -57,6 +66,7 @@ def test_parse_indicators_list():
 
 def test_parse_indicators_dict():
     from ThreatKiller import parse_indicators
+
     raw = {
         "data": [
             {"value": "https://example-malicious.test", "type": "url", "score": 50},
@@ -70,6 +80,7 @@ def test_parse_indicators_dict():
 
 def test_parse_indicators_results_key():
     from ThreatKiller import parse_indicators
+
     raw = {
         "results": [
             {"value": "8.8.8.8", "type": "ip", "score": 10},
@@ -81,12 +92,14 @@ def test_parse_indicators_results_key():
 
 def test_parse_indicators_empty():
     from ThreatKiller import parse_indicators
+
     result = parse_indicators([], "value", "type")
     assert result == []
 
 
 def test_parse_indicators_missing_value():
     from ThreatKiller import parse_indicators
+
     raw = [{"type": "ip", "score": 50}]
     result = parse_indicators(raw, "value", "type")
     assert result == []
@@ -94,6 +107,7 @@ def test_parse_indicators_missing_value():
 
 def test_client_headers():
     from ThreatKiller import ThreatKillerClient
+
     client = ThreatKillerClient(
         base_url="https://api.example.com",
         token="test-token-123",
@@ -106,6 +120,7 @@ def test_client_headers():
 
 def test_fetch_indicators_command():
     from ThreatKiller import fetch_indicators_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
     client.get_indicators.return_value = [
         {"value": "8.8.8.8", "type": "ip", "score": 80},
@@ -124,6 +139,7 @@ def test_fetch_indicators_command():
 
 def test_test_module_success():
     from ThreatKiller import test_module, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
     client.get_indicators.return_value = [{"value": "8.8.8.8"}]
     result = test_module(client, {"feed_endpoint": "/indicators"})
@@ -132,6 +148,7 @@ def test_test_module_success():
 
 def test_test_module_failure():
     from ThreatKiller import test_module, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
     client.get_indicators.side_effect = Exception("Connection refused")
     result = test_module(client, {"feed_endpoint": "/indicators"})
@@ -140,6 +157,7 @@ def test_test_module_failure():
 
 def test_get_indicators_command():
     from ThreatKiller import get_indicators_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
     client.get_indicators.return_value = [
         {"value": "8.8.8.8", "type": "ip", "score": 80},
@@ -157,10 +175,9 @@ def test_get_indicators_command():
 
 def test_ip_command():
     from ThreatKiller import ip_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
-    client.get_indicator_by_value.return_value = [
-        {"value": "8.8.8.8", "type": "ip", "score": 80}
-    ]
+    client.get_indicator_by_value.return_value = [{"value": "8.8.8.8", "type": "ip", "score": 80}]
     params = {
         "feed_endpoint": "/indicators",
         "value_field": "value",
@@ -173,6 +190,7 @@ def test_ip_command():
 
 def test_ip_command_no_data():
     from ThreatKiller import ip_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
     client.get_indicator_by_value.side_effect = Exception("Not found")
     params = {
@@ -186,10 +204,9 @@ def test_ip_command_no_data():
 
 def test_url_command():
     from ThreatKiller import url_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
-    client.get_indicator_by_value.return_value = [
-        {"value": "https://example-malicious.test", "type": "url", "score": 50}
-    ]
+    client.get_indicator_by_value.return_value = [{"value": "https://example-malicious.test", "type": "url", "score": 50}]
     params = {
         "feed_endpoint": "/indicators",
         "value_field": "value",
@@ -201,10 +218,9 @@ def test_url_command():
 
 def test_domain_command():
     from ThreatKiller import domain_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
-    client.get_indicator_by_value.return_value = [
-        {"value": "malicious.test", "type": "domain", "score": 30}
-    ]
+    client.get_indicator_by_value.return_value = [{"value": "malicious.test", "type": "domain", "score": 30}]
     params = {
         "feed_endpoint": "/indicators",
         "value_field": "value",
@@ -216,10 +232,9 @@ def test_domain_command():
 
 def test_file_command():
     from ThreatKiller import file_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
-    client.get_indicator_by_value.return_value = [
-        {"value": "d41d8cd98f00b204e9800998ecf8427e", "type": "md5", "score": 90}
-    ]
+    client.get_indicator_by_value.return_value = [{"value": "d41d8cd98f00b204e9800998ecf8427e", "type": "md5", "score": 90}]
     params = {
         "feed_endpoint": "/indicators",
         "value_field": "value",
@@ -231,10 +246,9 @@ def test_file_command():
 
 def test_cve_command():
     from ThreatKiller import cve_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
-    client.get_indicator_by_value.return_value = [
-        {"value": "CVE-2021-44228", "type": "cve", "score": 95}
-    ]
+    client.get_indicator_by_value.return_value = [{"value": "CVE-2021-44228", "type": "cve", "score": 95}]
     params = {
         "feed_endpoint": "/indicators",
         "value_field": "value",
@@ -246,10 +260,9 @@ def test_cve_command():
 
 def test_email_command():
     from ThreatKiller import email_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
-    client.get_indicator_by_value.return_value = [
-        {"value": "bad@malicious.test", "type": "email", "score": 70}
-    ]
+    client.get_indicator_by_value.return_value = [{"value": "bad@malicious.test", "type": "email", "score": 70}]
     params = {
         "feed_endpoint": "/indicators",
         "value_field": "value",
@@ -261,6 +274,7 @@ def test_email_command():
 
 def test_url_command_no_data():
     from ThreatKiller import url_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
     client.get_indicator_by_value.side_effect = Exception("Not found")
     params = {
@@ -274,6 +288,7 @@ def test_url_command_no_data():
 
 def test_domain_command_no_data():
     from ThreatKiller import domain_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
     client.get_indicator_by_value.side_effect = Exception("Not found")
     params = {
@@ -287,6 +302,7 @@ def test_domain_command_no_data():
 
 def test_file_command_no_data():
     from ThreatKiller import file_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
     client.get_indicator_by_value.side_effect = Exception("Not found")
     params = {
@@ -300,6 +316,7 @@ def test_file_command_no_data():
 
 def test_cve_command_no_data():
     from ThreatKiller import cve_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
     client.get_indicator_by_value.side_effect = Exception("Not found")
     params = {
@@ -313,6 +330,7 @@ def test_cve_command_no_data():
 
 def test_email_command_no_data():
     from ThreatKiller import email_command, ThreatKillerClient
+
     client = MagicMock(spec=ThreatKillerClient)
     client.get_indicator_by_value.side_effect = Exception("Not found")
     params = {
@@ -326,6 +344,7 @@ def test_email_command_no_data():
 
 def test_parse_indicators_non_dict_item():
     from ThreatKiller import parse_indicators
+
     raw = ["not_a_dict", None, 123]
     result = parse_indicators(raw, "value", "type")
     assert result == []
@@ -333,6 +352,7 @@ def test_parse_indicators_non_dict_item():
 
 def test_parse_indicators_score_none():
     from ThreatKiller import parse_indicators
+
     raw = [{"value": "8.8.8.8", "type": "ip"}]  # no score field
     result = parse_indicators(raw, "value", "type")
     assert len(result) == 1

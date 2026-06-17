@@ -1,6 +1,7 @@
 # ThreatKiller
 
 ## Overview
+
 Generic threat intelligence feed integration that pulls indicators from a custom REST/JSON API using Bearer token authentication.
 
 ## Configuration
@@ -19,57 +20,71 @@ Generic threat intelligence feed integration that pulls indicators from a custom
 ## Commands
 
 ### threatkiller-get-indicators
+
 Manually fetch and display indicators from the API.
 
 **Arguments:**
+
 | Argument | Description | Required |
 |----------|-------------|----------|
 | limit | Maximum number of indicators to return | False |
 
 ### ip
+
 Enriches an IP address.
 
 **Arguments:**
+
 | Argument | Description | Required |
 |----------|-------------|----------|
 | ip | IP address to enrich | True |
 
 ### url
+
 Enriches a URL.
 
 **Arguments:**
+
 | Argument | Description | Required |
 |----------|-------------|----------|
 | url | URL to enrich | True |
 
 ### domain
+
 Enriches a domain.
 
 **Arguments:**
+
 | Argument | Description | Required |
 |----------|-------------|----------|
 | domain | Domain to enrich | True |
 
 ### file
+
 Enriches a file hash.
 
 **Arguments:**
+
 | Argument | Description | Required |
 |----------|-------------|----------|
 | file | File hash (MD5, SHA1, SHA256) to enrich | True |
 
 ### cve
+
 Enriches a CVE.
 
 **Arguments:**
+
 | Argument | Description | Required |
 |----------|-------------|----------|
 | cve | CVE ID to enrich e.g. CVE-2021-44228 | True |
 
 ### email
+
 Enriches an email address.
 
 **Arguments:**
+
 | Argument | Description | Required |
 |----------|-------------|----------|
 | email | Email address to enrich | True |
