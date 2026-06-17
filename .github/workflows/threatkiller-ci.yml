@@ -1,0 +1,48 @@
+name: ThreatKiller CI
+
+on:
+  push:
+    paths:
+      - 'Packs/ThreatEnrich/**'
+  pull_request:
+    paths:
+      - 'Packs/ThreatEnrich/**'
+
+jobs:
+  validate-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install demisto-sdk
+        run: pip install demisto-sdk autopep8 pylint mypy pytest
+
+      - name: Validate
+        run: |
+          export DEMISTO_SDK_IGNORE_CONTENT_WARNING=true
+          demisto-sdk validate -i Packs/ThreatEnrich/Integrations/ThreatKiller/ThreatKiller.yml
+
+      - name: Pre-commit
+        run: |
+          export DEMISTO_SDK_IGNORE_CONTENT_WARNING=true
+          demisto-sdk pre-commit -i Packs/ThreatEnrich/Integrations/ThreatKiller/ --no-docker
+
+      - name: Pylint
+        run: |
+          pylint Packs/ThreatEnrich/Integrations/ThreatKiller/ThreatKiller.py \
+            --disable=C0114,C0115,C0116,E0401 \
+            --exit-zero
+
+      - name: Mypy
+        run: |
+          mypy Packs/ThreatEnrich/Integrations/ThreatKiller/ThreatKiller.py \
+            --ignore-missing-imports \
+            --no-strict-optional
