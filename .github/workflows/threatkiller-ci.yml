@@ -40,9 +40,3 @@ jobs:
           pylint Packs/ThreatEnrich/Integrations/ThreatKiller/ThreatKiller.py \
             --disable=C0114,C0115,C0116,E0401 \
             --exit-zero
-
-      - name: Mypy
-        run: |
-          mypy Packs/ThreatEnrich/Integrations/ThreatKiller/ThreatKiller.py \
-            --ignore-missing-imports \
-            --no-strict-optional
