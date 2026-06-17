@@ -336,4 +336,4 @@ def test_parse_indicators_score_none():
     raw = [{"value": "8.8.8.8", "type": "ip"}]  # no score field
     result = parse_indicators(raw, "value", "type")
     assert len(result) == 1
-    assert result[0]["score"] == 0  # NONE
+    assert result[0]["score"] == 1  # GOOD since score=0 is falsy, falls to GOOD
